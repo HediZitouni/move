@@ -14,6 +14,8 @@ public class GroundManager : MonoBehaviour
 
     [SerializeField] private Text timeText;
 
+    [SerializeField] private StoreScore storeScore;
+
     private bool gameDone = false;
     private float gameTime = 0f;
 
@@ -33,7 +35,7 @@ public class GroundManager : MonoBehaviour
     void Update()
     {
         if (!gameDone) {
-            gameTime = Mathf.Round((Time.time - PlayerPrefs.GetFloat("startTime"))*1000)/1000;
+            gameTime = roundFloat(Time.time - PlayerPrefs.GetFloat("startTime"), 3);
             timeText.text = gameTime.ToString() + "s";
         }
 
@@ -48,15 +50,28 @@ public class GroundManager : MonoBehaviour
         }
     }
 
+    private float roundFloat(float value, int significantNumber) {
+        if (significantNumber < 0) {
+            return value;
+        }
+
+        float factor = Mathf.Pow(10, significantNumber);
+        return Mathf.Round(value*factor)/factor;
+    }
+
     public void changeActiveGround() {
         gameDone = activeGround >= nbGrounds-1;
         if (gameDone) {
-            Debug.Log(Time.time - PlayerPrefs.GetFloat("startTime"));
+            finalizeGame();
             return;
         } else {
             activeGround++;
             grounds[sortedGround[activeGround]].GetComponent<Ground>().activate();
         }
+    }
 
+    private void finalizeGame() {
+        Debug.Log("Setting final score : " + gameTime.ToString() + 's');
+        storeScore.SetScore(gameTime);
     }
 }
