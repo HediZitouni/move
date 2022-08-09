@@ -16,6 +16,8 @@ public class GroundManager : MonoBehaviour
 
     [SerializeField] private StoreScore storeScore;
 
+    [SerializeField] private DiffScore diffScore;
+
     private bool gameDone = false;
     private float gameTime = 0f;
 
@@ -27,6 +29,7 @@ public class GroundManager : MonoBehaviour
         activeGround = 0;
         Ground currentGround = grounds[sortedGround[activeGround]].GetComponent<Ground>();
         currentGround.activate();
+        diffScore.Reset();
         PlayerPrefs.SetFloat("startTime", Time.time);
         body = player.GetComponent<Body>();
     }
@@ -46,6 +49,7 @@ public class GroundManager : MonoBehaviour
             activeGround = 0;
             currentGround = grounds[sortedGround[activeGround]].GetComponent<Ground>();
             currentGround.activate();
+            diffScore.Reset();
             body.respawn();
         }
     }
@@ -61,6 +65,7 @@ public class GroundManager : MonoBehaviour
 
     public void changeActiveGround() {
         gameDone = activeGround >= nbGrounds-1;
+        diffScore.CompareScore(roundFloat(Time.time - PlayerPrefs.GetFloat("startTime"), 3));
         if (gameDone) {
             finalizeGame();
             return;
@@ -73,5 +78,6 @@ public class GroundManager : MonoBehaviour
     private void finalizeGame() {
         Debug.Log("Setting final score : " + gameTime.ToString() + 's');
         storeScore.SetScore(gameTime);
+        diffScore.PublishNewBestScore();
     }
 }
